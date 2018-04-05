@@ -62,16 +62,16 @@ router.get('/devices', function(req,res,next){
 */
 router.get('/all/:date', function(req,res, next){
     pings.getAllEpochs().then(data =>{
-        let deviceArr = [];
+        let deviceArr = [];//--> will simplify array of the devies
         let paramDate = moment(req.params.date).format('YYYY-MM-DD');
         data['data'].forEach(ping => {
             deviceArr.push(ping.device_id)
         });
         let filterDevice = filterData(deviceArr);
-        let allDevices = {};
+        let allDevices = {};//-->will get the desired output
         filterDevice.forEach(elem =>{
             allDevices[elem]=[];
-            let epochTime = [];
+            let epochTime = [];//--> will simplify array of the epoch_time per devices
             data['data'].forEach(epoch =>{
                 if(elem == epoch.device_id){
                     epochTime.push(epoch.epoch_time);
@@ -91,14 +91,14 @@ router.get('/all/:date', function(req,res, next){
 });
 
 /*
-* Get all epochs of each devices
+* Get all epochs of each devices on a range of time
 */
 router.get('/all/:from/:to', function(req,res,next){
     pings.getAllEpochs().then(data =>{
-        let deviceArr = [];
+        let deviceArr = [];//--> will simplify array of the devices
         let from = isTimestamp(Number(req.params.from))?moment.unix(req.params.from).utc().format('YYYY-MM-DD HH:mm:ss'):moment(req.params.from).format('YYYY-MM-DD');
         let to = isTimestamp(Number(req.params.to))?moment.unix(req.params.to).utc().format('YYYY-MM-DD HH:mm:ss'):moment(req.params.to).format('YYYY-MM-DD');        
-        let allDevices = {};
+        let allDevices = {};//-->will get the desired output
 
         data['data'].forEach(ping => {
             deviceArr.push(ping.device_id)
@@ -106,7 +106,7 @@ router.get('/all/:from/:to', function(req,res,next){
         let filterDevice = filterData(deviceArr);
         filterDevice.forEach(elem =>{
             allDevices[elem]=[];
-            let epochTime = [];
+            let epochTime = [];//--> will simplify array of the epoch for each device
             data['data'].forEach(epoch =>{
                 if(elem == epoch.device_id){
                     epochTime.push(epoch.epoch_time);
@@ -137,12 +137,12 @@ router.get('/all/:from/:to', function(req,res,next){
 router.get('/:deviceId/:date', function(req,res,next){
     pings.getByDeviceId(req.params.deviceId).then(data=>{
         let paramDate = moment(req.params.date).format('YYYY-MM-DD');
-        let arr = [];
+        let arr = [];//--> will simplify array of the data
         data['data'].forEach(element => {
             arr.push(element.epoch_time)
         });
         epochArr = filterData(arr);
-        let filterDate = [];
+        let filterDate = [];//-->will get the desired output
         epochArr.forEach(epoch =>{
             let formatDate = moment.unix(epoch).utc().format('YYYY-MM-DD') ;
             if(formatDate == paramDate){
@@ -163,23 +163,13 @@ router.get('/:deviceId/:date', function(req,res,next){
 */
 router.get('/:deviceId/:from/:to', function(req,res,next){
     pings.getByDeviceId(req.params.deviceId).then(data=>{
-        let from, to;
-        if(isTimestamp(Number(req.params.from))){
-            from = moment.unix(req.params.from).utc().format('YYYY-MM-DD HH:mm:ss');
-        }else{
-            from = moment(req.params.from).format('YYYY-MM-DD 00:00:00');
-        }
-
-        if(isTimestamp(Number(req.params.to))){        
-            to = moment.unix(req.params.to).utc().format('YYYY-MM-DD HH:mm:ss');
-        }else{        
-            to = moment(req.params.to).format('YYYY-MM-DD 00:00:00');
-        }
-        let arr = [];//--> simple array of the data
+        let from = isTimestamp(Number(req.params.from))? moment.unix(req.params.from).utc().format('YYYY-MM-DD HH:mm:ss') : moment(req.params.from).format('YYYY-MM-DD 00:00:00');    
+        let to = isTimestamp(Number(req.params.to))? moment.unix(req.params.to).utc().format('YYYY-MM-DD HH:mm:ss') : moment(req.params.to).format('YYYY-MM-DD 00:00:00');
+        let arr = [];//--> will simplify array of the data
         data['data'].forEach(element => {
             arr.push(element.epoch_time)
         });
-        let filterDate = [];
+        let filterDate = [];//-->will get all the epoch_time filtered
         arr.forEach(epoch =>{
             let formatEpoch = moment.unix(epoch).utc().format('YYYY-MM-DD HH:mm:ss');
             if(isTimestamp(from) || isTimestamp(to)){
